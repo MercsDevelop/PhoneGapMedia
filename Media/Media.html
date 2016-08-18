@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Media</title>
+    <meta name="viewport" content="width=device-width initial-scale=1">
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" charset="UTF-8">
+        //等待加载PhoneGap
+        document.addEventListener("deviceready",onDeviceReady,false);
+        //PhoneGap加载完毕
+        function onDeviceReady(){
+            playAudio("http://audio.ibeat.org/content/p1rj1s/p1rj1s_-_rockGuitar.mp3");
+        }
+        //音频播放器
+        var my_media = null;
+        var mediaTimer = null;
+        //播放音频文件
+        function playAudio(src) {
+            my_media = new Media(src,onSuccess,onError);//从目标文件中创建Media对象
+            my_media.play();//播放音频
+            if (mediaTimer == null) {//每秒更新一次媒体播放到的位置
+                mediaTimer = setInterval(function () {
+                    //获取媒体播放到的位置
+                    my_media.getCurrentPosition(
+                            //获取成功后调用的回调函数
+                            function (position) {
+                                if (position > -1){
+                                    setAudioPosition((position/1000) + "sec");
+                                }
+                            },
+                            //发生错误后调用的回调函数
+                            function (e) {
+                                console.log("ERROR getting pos= " + e);
+                                setAudioPosition("Error: " + e);
+                            }
+                    );
+                },1000);
+            }
+        }
+        //暂停播放
+        function pauseAudio() {
+            if (my_media){
+                my_media.pause();
+            }
+        }
+        //停止播放
+        function stopAudio() {
+            if (my_media){
+                my_media.stop();
+            }
+            clearInterval(mediaTimer);
+            mediaTimer=null;
+        }
+        //创建Media成功后调用的回调函数
+        function onSuccess() {
+            console.log("playAudio():Audio Success");
+        }
+        //创建Media失败后调用的回调函数
+        function onError(error) {
+            alert('code: ' + error.code + '\n' +
+                  'message' + error.message + '\n');
+        }
+        //设置音频播放位置
+        function setAudioPosition(position) {
+            document.getElementById('audio_position').innerHTML = position;
+        }
+    </script>
+</head>
+<body>
+<a href="#" class="btn large" onclick="playAudio('http://audio.ibeat.org/content/p1rj1s/p1rj1s_-_rockGuitar.mp3');">Play Audio</a>
+<a href="#" class="btn large" onclick="pauseAudio();">Pause Playing Audio</a>
+<a href="#" class="btn large" onclick="stopAudio();">Stop Playing Audio</a>
+<p id="audio_position"></p>
+</body>
+</html>
